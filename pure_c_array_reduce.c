@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>  // for memset (create variable length arrays)
+#include <time.h>    // for time
 
 
 int main(int argc, char *argv[]) {
@@ -22,6 +23,9 @@ int main(int argc, char *argv[]) {
 
     // allocate memory for array
     memset(array, 0, sizeof array);
+
+    // intialize Pseudo-Random Number Generator based on current time
+    srand(time(NULL));
 
     // Create array of length array_length consisting of random ints in range 0 to (max_int-1)
     int i;
