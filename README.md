@@ -52,12 +52,11 @@ So for the 1024 operation example, on a four core machine it would take 256.75se
 each operation takes 1sec.
 
 
+## Toolchain
 
-
-
-
-          
-
+OS: Windows 10 x64
+Shell env: Ubuntu 16.04 and Windows Subsystem for Linux https://msdn.microsoft.com/en-us/commandline/wsl/about?f=255&MSPPError=-2147217396
+C Compiler: GCC 5.4.0 (OpenMP 4.0 support)
 
 
   
