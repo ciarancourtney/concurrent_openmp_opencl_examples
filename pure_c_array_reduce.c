@@ -38,4 +38,16 @@ int main(int argc, char *argv[]) {
         printf("%d\n", array[i]);
     }
 
+    // Sum all integers in array and print result to stdout
+    int sum = 0;
+    int j;
+    clock_t begin = clock();
+    for (j = 0; j < array_length; j++) {
+        sum = sum + array[j] ;
+    }
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("%d\n", sum);
+    printf("Time Taken: %f\n", time_spent);
+
 }
