@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>  // for memset (create variable length arrays)
 #include <time.h>    // for time
 
 
@@ -18,11 +17,13 @@ int main(int argc, char *argv[]) {
     int max_int;
     sscanf (argv[2],"%d",&max_int);
 
-    // create variable length array
-    int array[array_length];
-
-    // allocate memory for array
-    memset(array, 0, sizeof array);
+    // create variable length array pointer and allocate enough memory for that number of ints (4 bytes each)
+    int *array;
+    array = malloc(array_length * sizeof(*array));
+    if (array == NULL) {
+        printf("Error allocating memory!\n");
+        exit(1);
+    }
 
     // intialize Pseudo-Random Number Generator based on current time
     srand(time(NULL));
@@ -31,11 +32,6 @@ int main(int argc, char *argv[]) {
     int i;
     for(i = 0; i < array_length; i++){
         array[i]=(rand()%max_int);
-    }
-
-    // print to console for user
-    for(i = 0; i < array_length; i++){
-        printf("%d\n", array[i]);
     }
 
     // Sum all integers in array and print result to stdout
@@ -49,5 +45,5 @@ int main(int argc, char *argv[]) {
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("%d\n", sum);
     printf("Time Taken: %f\n", time_spent);
-
+    free(array);
 }
