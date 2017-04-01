@@ -6,7 +6,7 @@
 int main(int argc, char *argv[]) {
 
     if (argc < 3) {
-        fprintf(stderr, "usage: %s <array_length> <range>\n", argv[0]);
+        fprintf(stderr, "usage: %s <array_length> <range> <--verbose>\n", argv[0]);
         exit(1);
     }
 
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Sum all integers in array and print result to stdout
-    int sum = 0;
+    long int sum = 0;
     int j;
     clock_t begin = clock();
     for (j = 0; j < array_length; j++) {
@@ -43,7 +43,12 @@ int main(int argc, char *argv[]) {
     }
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("%d\n", sum);
-    printf("Time Taken: %f\n", time_spent);
+
+    if(argc > 3) {
+        printf("Total Sum: %ld\n", sum);
+        printf("Time Taken: %f\n", time_spent);
+    } else {
+        printf("%f\n", time_spent);
+    }
     free(array);
 }
