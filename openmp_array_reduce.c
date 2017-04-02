@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>    // for time
+#include <time.h>
+#include <omp.h>
 
 
 int main(int argc, char *argv[]) {
@@ -37,10 +38,14 @@ int main(int argc, char *argv[]) {
     // Sum all integers in array and print result to stdout
     long int sum = 0;
     int j;
+
     clock_t begin = clock();
-    for (j = 0; j < array_length; j++) {
-        sum = sum + array[j] ;
-    }
+
+    #pragma omp parallel for reduction(+:sum)
+        for (j = 0; j < array_length; j++) {
+            sum = sum + array[j] ;
+        }
+
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
