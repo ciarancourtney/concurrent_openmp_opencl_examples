@@ -51,4 +51,6 @@ int main(int argc, char *argv[]) {
         printf("%f\n", time_spent);
     }
     free(array);
+
+    return 0;
 }
