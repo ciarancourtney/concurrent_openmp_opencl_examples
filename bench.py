@@ -10,8 +10,10 @@ import matplotlib.pyplot as plt
 logging.getLogger().setLevel(logging.INFO)
 
 if not platform.system() == 'Linux':
-    C_BIN = ['bash.exe', '-c', '/mnt/c/workspace/openmp/pure_c_array_reduce']
-    OMP_BIN = ['bash.exe', '-c', '/mnt/c/workspace/openmp/openmp_array_reduce']
+    # C_BIN = ['bash.exe', '-c', '/mnt/c/workspace/openmp/pure_c_array_reduce']
+    # OMP_BIN = ['bash.exe', '-c', '/mnt/c/workspace/openmp/openmp_array_reduce']
+    C_BIN = ['pure_c_array_reduce.exe']
+    OMP_BIN = ['openmp_array_reduce.exe']
 else:
     C_BIN = ['./pure_c_array_reduce']
     OMP_BIN = ['openmp_array_reduce']
@@ -79,8 +81,8 @@ b = Benchmark(start_size=1000000, double_count=10, iterations=5)
 # run each benchmark
 pure_c = b.run(C_BIN)
 time.sleep(1)
-#openmp = b.run(OMP_BIN)
+openmp = b.run(OMP_BIN)
 time.sleep(1)
 
 # plot all results in one graph
-plot_results(pure_c)
+plot_results(pure_c, openmp)

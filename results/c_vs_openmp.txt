@@ -1,0 +1,22 @@
+INFO:root:Initializing benchmark...
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 1000000 is 0.0 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 2000000 is 0.0006000000000000001 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 4000000 is 0.0012000000000000001 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 8000000 is 0.0024000000000000002 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 16000000 is 0.0048000000000000004 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 32000000 is 0.01 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 64000000 is 0.020200000000000003 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 128000000 is 0.041 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 256000000 is 0.08639999999999999 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 512000000 is 0.2036 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 1000000 is 0.0028 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 2000000 is 0.0016 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 4000000 is 0.002 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 8000000 is 0.0032 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 16000000 is 0.004600000000000001 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 32000000 is 0.0073999999999999995 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 64000000 is 0.013000000000000001 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 128000000 is 0.0256 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 256000000 is 0.0508 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 512000000 is 0.1018 sec
+INFO:root:Plotting Results...

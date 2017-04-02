@@ -54,13 +54,96 @@ each operation takes 1sec.
 
 ## Toolchain
 
-OS: Windows 10 x64
-Shell env: Ubuntu 16.04 and Windows Subsystem for Linux https://msdn.microsoft.com/en-us/commandline/wsl/about?f=255&MSPPError=-2147217396
-C Compiler: GCC 5.4.0 (OpenMP 4.0 support)
+### Linux subsystem on Windows 10
+- OS: Ubuntu 16.04 and Windows Subsystem for Linux (WSL) https://msdn.microsoft.com/en-us/commandline/wsl/about?f=255&MSPPError=-2147217396
+- C Compiler: GCC 5.4.0 (OpenMP 4.0 support)
 
+### Windows 10
+- OS: Windows 10 x64
+- C Compiler: Intel C/C++ compiler 17.0.2 (OpenMP 4.5 support)
 
+## Method
   
+### C Implementation (pure_c_array_reduce.c)
+
+As both openMP and openCL support C, it was decided to create a base method in pure C to perform a sum reduction, and then
+extend the code to work in openMP and openCL.
+
+Usage:
+
+    icl pure_c_array_reduce.c -o pure_c_array_reduce.c
+    ./pure_c_array_reduce <array_size> <range> --verbose
+    ./pure_c_array_reduce 1000000000 100 --verbose
+
+* An array of random integers are created conforming to the stdin
+  * int array_size - number of random elements to create in array
+  * int range - the maximum integer to random generate i.e. between zero and range-1
+
+* sscanf() is used to parse stdin arguments as integers
+* malloc() is used to allocate memory in the stack for the variable sized array
+* Random numbers are seeded based on time
+* An array of random integers is generated using rand() in a for loop
+* The reduction sum is calculated using a for loop into the variable sum, a long integer.
+* clock() is used to calculate the CPU time that the reduction loop consumes
+* After the reduction is down and total time is output to stdout, the allocated memory is cleared using free() and
+the program returns 0
+  
+### OpenMP Implementation in C (openmp_array_reduce.c)
+  
+The advantage of OpenMP is take it is easy to employ parallelism to a serial piece of C/C++ code without changing code
+dramatically. OpenMP offers several clauses that try to add parallelism to common serial code e.g. for loops.
+One such clause is REDUCTION, which can be decorated on any for loops that perform a certain operation, i.e. summing.
+ 
+C summing for loop:
+
+    for (j = 0; j < array_length; j++) {
+        sum = sum + array[j] ;
+    }
+    
+OpenMP summing for loop:
+
+    #pragma omp parallel for reduction(+ : sum)
+    for (j = 0; j < array_length; j++) {
+        sum = sum + array[j] ;
+    }
+
+The OpenMP REDUCTION clause knows that the sum variable is a shared variable which is modified in every iteration.
+Without the REDUCTION clause, we would introduce a race condition, as concurrent threads try to update the shared variable 
+at the same time. In the above code sample, the reduction parameters are:
+
+* The operation (+)
+* The reduction variable (sum)
+
+OpenMP launches threads to compute each for loop concurrently. On the first iteration it knows that for array length 1024,
+512 summing operations are required, so on a 4 core machine this will mean 512/4 operations to be performed serially per core.
+Each thread has its own local copy of the sum variable so that it doesn't clash with any of the other concurrent threads.
+After the last iteration, all local copies of the sum variable are combined into the shared variable. 
+
+**Intel Compile Instructions**
+
+    icl /MD /Qopenmp openmp_array_reduce.c -o openmp_array_reduce
+    
+This will output a windows exe binary named openmp_array_reduce.exe.
+
+**C Vs OpenMP results**
+
+A significant speedup was found with the most simple form of reduction pragma added to the for loop. At the top end
+of 512,000,000 elements, a 2x speedup was found (0.2036sec Vs 0.1018sec).
+
+![Alt text](results/c_vs_openmp.png?raw=true)
+
+
 ## References
 
 R. P. Brent. The parallel evaluation of general arithmetic expressions. Journal of the Association
 for Computing Machinery, 21(2):201–206, Apr. 1974.
+
+http://jakascorner.com/blog/2016/06/omp-for-reduction.html 
+
+Intel Compiler notes https://software.intel.com/en-us/intel-cplusplus-compiler-17.0-user-and-reference-guide
+
+The compiler supports many OpenMP* features, including all of OpenMP* Version 4.0 and most of OpenMP* Version 4.5.
+
+Get Intel Parallel Studio ZE 2017 free for academic use from here https://software.intel.com/en-us/intel-parallel-studio-xe
+
+See here for notes on compiler CLI arguments https://software.intel.com/en-us/node/522690
