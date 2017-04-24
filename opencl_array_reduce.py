@@ -33,7 +33,7 @@ def run(count):
     t2 = 1e-10 *(evt.profile.end - evt.profile.start)
     cl.enqueue_copy(queue, result_sum, result_sum_buf)
 
-    #print(o, np.sum(a))  # uncomment to compart actual with opencl kernel result
+    #print(result_sum, np.sum(array))  # uncomment to compart actual with opencl kernel result
 
     # return total time taken in seconds
     return (t1+t2)

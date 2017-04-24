@@ -54,13 +54,15 @@ each operation takes 1sec.
 
 ## Toolchain
 
-### Linux subsystem on Windows 10
-- OS: Ubuntu 16.04 and Windows Subsystem for Linux (WSL) https://msdn.microsoft.com/en-us/commandline/wsl/about?f=255&MSPPError=-2147217396
-- C Compiler: GCC 5.4.0 (OpenMP 4.0 support)
+- OS: Windows 10 x64 with Visual Studio 2015 Community Edition
 
-### Windows 10
-- OS: Windows 10 x64
+**OpenMP**
 - C Compiler: Intel C/C++ compiler 17.0.2 (OpenMP 4.5 support)
+
+**OpenCL**
+- C Compiler: Intel C/C++ compiler 17.0.2 (OpenCL 2.1 support)
+- OpenCL Driver: Intel® SDK for OpenCL™ Applications for Windows 6.3.0.1904 (2016-11-02)
+
 
 ## Method
   
@@ -133,7 +135,122 @@ of 512,000,000 elements, a 2x speedup was found (0.2036sec Vs 0.1018sec).
 ![Alt text](results/c_vs_openmp.png?raw=true)
 
 
+### OpenCL Implementation in python (opencl_array_reduce.py)
+
+**OpenCL** environment install steps
+
+After much frustration trying to get VS2015 and Intel OpenCL SDK to play nice, and trying and failing  GCC for windows, it was 
+decided to instead use pyopencl to run the kernel code.
+
+**pyopencl** 
+
+There are still many barriers to cross when building pyopencl [on windows](https://wiki.tiker.net/PyOpenCL/Installation/Windows#Installing_PyOpenCL_on_Windows)
+Downloading and installing a prebuilt binary for windows from [here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyopencl) bypassed these issues and saved a lot of time.
+
+Basic requirements
+* Python 3.6
+* pyopencl
+* numpy (for creating c-like arrays)
+
+pyopencl automatically detects the Intel SDK, or it can be specified using the PYOPENCL_CTX environment variable.
+
+Based on the pyopencl [array multiplication benchmark](https://github.com/pyopencl/pyopencl/blob/master/examples/benchmark.py)
+a similar piece of code was derived to instead calculate sum reduction using OpenCL
+
+OpenCL Terms:
+
+Device: CPU or GPU that can be used with the OpenCL API
+
+Context: A set of one or more devices.
+
+Platform: Contains information about the machine and the implementation version of OpenCL
+
+Program: Contains the source code of the functions to be executed in OpenCL.
+
+CommandQueue: Command queue to run. A command can be, for example: Read or write a buffer, execute a function
+
+**Memory Allocation**
+
+An array of random integers is defined using numpy with dtype int32. This allocation with numpy allows us to create an
+array at the host. We must now declare the same array at the __global memory of OpenCL. To do this you have to create buffers in the context.
+
+
+**kernel code** 
+
+
+    __kernel void reduce(__global int *a, __global int *r, __local int *b) {
+        uint global_id = get_global_id(0);
+        uint group_id = get_group_id(0);
+        uint local_id = get_local_id(0);
+        uint local_size = get_local_size(0);
+    
+        b[local_id] = a[global_id];
+        barrier(CLK_LOCAL_MEM_FENCE);
+    
+        for(uint s = local_size/2; s > 0; s >>= 1) {
+        if(local_id < s) {
+          b[local_id] += b[local_id+s];
+        }
+        barrier(CLK_LOCAL_MEM_FENCE);
+        }
+        if(local_id == 0) r[group_id] = b[local_id];
+    }
+
+The __kernel keyword is there to say that this is a main function of the program. It is a function that we can call from our program in python.
+The __global keyword is there to say that this is a parameter stored in the global memory, the memory of the context. 
+The function __get_global_id(0)__ returns the global index.
+
+During kernel runtime, all integers are copied into shared memory (VRAM), which is much less than the system memory (RAM).
+The first N/2 numbers on the left side are taken and added to the other N/2 numbers on the right side. Then half of those
+and added to the next half until only one number, the result, remains.
+
+CLK_LOCAL_MEM_FENCE barriers will either flush any variables stored in local memory or queue a memory fence to ensure
+correct ordering of memory operations to local memory.
+
+**Runtime**
+
+The implementation of pyopencl allows us again to simplify the use of opencl. It is no longer necessary to create a Kernel
+object to use it, nor to pass the arguments one by one. To reduce the Array we simply call the function sum (A, B, C) on the set of elements, we simply write
+
+    cl_kernel.reduce(queue, (N,), (thread_count,), array_buf, placeholder_buf, local_buf)
+
+Reduce must be called once more to obtain the final sum into result_sum_buf:
+
+    evt = cl_kernel.reduce(queue, (thread_count,), (thread_count,), placeholder_buf, result_sum_buf, local_buf)
+
+Then the result is stored in result_sum_buf, must be transferred from the context to the host:
+
+    cl.enqueue_copy(queue, result_sum, result_sum_buf)
+
+The result can then be compared with a call to numpy.sum to confirm correctness.
+
+    print(result_sum, np.sum(array))  # uncomment this line to check
+
+**C Vs OpenMP Vs OpenCL results**
+
+![Alt text](results/c_vs_openmp_vs_opencl.png?raw=true)
+
+Unfortunately due to GPU memory constraints and the fact that N must be a multiple of the worker size, I wasn't able to
+reduce an array length larger than 67,108,864, but results show that at size 33,554,432, OpenCL is doing the reduction
+10x faster then near equivalent array size in serial C or multithreaded C with OpenMP. Also the time taken is linear with
+array size.
+
+## Conclusion
+
+Creating a fair comparison between OpenCL and the other methods is difficult, as the array size must be a specific multiple
+of the worker count, and also host GPU memory constraints. But the speedup found when doing Parallel Sum Reduction is 
+very significant.
+
+At the moment the greatest difficulty with OpenCL is resolving the nuanced issues between different GPU hardware, associated
+drivers and SDKs, Windows compiler issues, and also OpenCL versions. PyOpenCL can ease the burden of auto-detecting
+installed SDKs on windows and wrapping & executing CL code.
+
+
 ## References
+
+Private Github repo available at https://github.com/ciarancourtney/concurrent_openmp_opencl_examples
+This repo will be public from April 25th to Summer 2017 to aid marking, it will be made private again to avoid future 
+plagiarism for future CA670 assignments. Please do not hesitate to ask if there are any issues with this, or problems reproducing benchmarks.
 
 R. P. Brent. The parallel evaluation of general arithmetic expressions. Journal of the Association
 for Computing Machinery, 21(2):201–206, Apr. 1974.
@@ -147,3 +264,5 @@ The compiler supports many OpenMP* features, including all of OpenMP* Version 4.
 Get Intel Parallel Studio ZE 2017 free for academic use from here https://software.intel.com/en-us/intel-parallel-studio-xe
 
 See here for notes on compiler CLI arguments https://software.intel.com/en-us/node/522690
+
+PyOpenCL documentation https://documen.tician.de/pyopencl/
