@@ -4,8 +4,9 @@ import logging
 import subprocess
 import platform
 import time
-
 import matplotlib.pyplot as plt
+
+import opencl_array_reduce
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -75,14 +76,33 @@ class Benchmark(object):
 
         return results
 
+    def run_opencl(self):
+        results = []
+        power = 20
+        while power < 27:  # 2**27 is the largest N possible on my machine
+            iteration = 0
+            time_s = 0
+            array_size = 2 ** power
+            while iteration < self.iterations:
+                time = opencl_array_reduce.run(power)
+                iteration += 1
+                time_s += time
+            results.append(['opencl', array_size, time_s/self.iterations])
+            logging.info('[{}] average runtime for array size {} is {} sec'.format('opencl', array_size, time_s/self.iterations))
+            power += 1
+
+        return results
+
 # init benchmark parameters
-b = Benchmark(start_size=1000000, double_count=10, iterations=5)
+b = Benchmark(start_size=1000000, double_count=7, iterations=3)
 
 # run each benchmark
 pure_c = b.run(C_BIN)
 time.sleep(1)
 openmp = b.run(OMP_BIN)
 time.sleep(1)
+opencl = b.run_opencl()
+time.sleep(1)
 
 # plot all results in one graph
-plot_results(pure_c, openmp)
+plot_results(pure_c, openmp, opencl)

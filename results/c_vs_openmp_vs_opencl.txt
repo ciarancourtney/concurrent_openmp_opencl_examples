@@ -1,0 +1,23 @@
+INFO:root:Initializing benchmark...
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 1000000 is 0.0003333333333333333 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 2000000 is 0.001 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 4000000 is 0.0013333333333333333 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 8000000 is 0.0030000000000000005 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 16000000 is 0.006999999999999999 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 32000000 is 0.010666666666666666 sec
+INFO:root:[pure_c_array_reduce.exe] average runtime for array size 64000000 is 0.021666666666666667 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 1000000 is 0.0016666666666666668 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 2000000 is 0.002 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 4000000 is 0.0016666666666666668 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 8000000 is 0.0026666666666666666 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 16000000 is 0.005666666666666667 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 32000000 is 0.01 sec
+INFO:root:[openmp_array_reduce.exe] average runtime for array size 64000000 is 0.017 sec
+INFO:root:[opencl] average runtime for array size 1048576 is 5.2453333333333335e-05 sec
+INFO:root:[opencl] average runtime for array size 2097152 is 0.00010073866666666666 sec
+INFO:root:[opencl] average runtime for array size 4194304 is 0.00019829333333333334 sec
+INFO:root:[opencl] average runtime for array size 8388608 is 0.000397152 sec
+INFO:root:[opencl] average runtime for array size 16777216 is 0.0008124693333333333 sec
+INFO:root:[opencl] average runtime for array size 33554432 is 0.0016144080000000001 sec
+INFO:root:[opencl] average runtime for array size 67108864 is 0.0032531093333333333 sec
+INFO:root:Plotting Results...
